@@ -4,12 +4,14 @@ import kevin.elasticsearch.domain.Employee;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class EmployeeResponse {
     private Long id;
     private String name;

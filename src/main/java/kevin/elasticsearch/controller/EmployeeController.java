@@ -4,6 +4,7 @@ import kevin.elasticsearch.dto.EmployeeRequest;
 import kevin.elasticsearch.dto.EmployeeResponse;
 import kevin.elasticsearch.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/employees")
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -32,6 +34,8 @@ public class EmployeeController {
     @GetMapping
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees(
             @RequestParam(required = false) Long companyId) {
+        log.debug("debug log test - companyId : {}", companyId);
+        log.trace("trace log test - companyId : {}", companyId);
         List<EmployeeResponse> responses;
         if (companyId != null) {
             responses = employeeService.getEmployeesByCompany(companyId);
