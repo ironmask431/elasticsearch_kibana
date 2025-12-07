@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String REQUEST_BODY_ATTRIBUTE = "cachedRequestBody";
+
     /**
      * IllegalArgumentException 처리
      * 잘못된 인자가 전달된 경우 400 Bad Request 응답
@@ -28,35 +30,94 @@ public class GlobalExceptionHandler {
             IllegalArgumentException e,
             HttpServletRequest request) {
 
-        // Request Body 읽기 (ContentCachingRequestWrapper인 경우만 가능)
-        String requestBody = "N/A";
-        if (request instanceof ContentCachingRequestWrapper) {
-            ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
-            byte[] content = wrapper.getContentAsByteArray();
-            if (content.length > 0) {
-                requestBody = new String(content, StandardCharsets.UTF_8);
-            }
-        }
-
-        // 한 줄 로그 출력
-        log.error("\nIllegalArgumentException - Method: {}, URL: {}, QueryString: {}, \nBody: {}, \nMessage: {}",
-                request.getMethod(),
-                request.getRequestURL(),
-                request.getQueryString() != null ? request.getQueryString() : "N/A",
-                requestBody,
-                e.getMessage());
+        // 요청 정보 로깅
+        logException("IllegalArgumentException", e, request);
 
         // 에러 응답 생성
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(e.getMessage())
-                .path(request.getRequestURI())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorResponse errorResponse = createErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                e.getMessage(),
+                request.getRequestURI()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorResponse);
+    }
+
+    /**
+     * RuntimeException 처리
+     * 예상치 못한 런타임 예외 발생 시 500 Internal Server Error 응답
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(
+            RuntimeException e,
+            HttpServletRequest request) {
+
+        // 요청 정보 로깅
+        logException("RuntimeException", e, request);
+
+        // 에러 응답 생성
+        ErrorResponse errorResponse = createErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorResponse);
+    }
+
+    /**
+     * 예외 정보를 로그로 출력하는 공통 메서드
+     */
+    private void logException(String exceptionType, Exception e, HttpServletRequest request) {
+        String requestBody = getRequestBody(request);
+        String queryString = request.getQueryString() != null ? request.getQueryString() : "N/A";
+
+        log.error("\n{} - Method: {}, URL: {}, QueryString: {}, \nBody: {}, \nMessage: {}",
+                exceptionType,
+                request.getMethod(),
+                request.getRequestURL(),
+                queryString,
+                requestBody,
+                e.getMessage());
+    }
+
+    /**
+     * Request Body를 읽어오는 공통 메서드
+     * Filter에서 저장한 attribute 또는 ContentCachingRequestWrapper에서 읽기 시도
+     */
+    private String getRequestBody(HttpServletRequest request) {
+        // 1. Filter에서 저장한 attribute 확인
+        Object cachedBody = request.getAttribute(REQUEST_BODY_ATTRIBUTE);
+        if (cachedBody != null && !cachedBody.toString().isEmpty()) {
+            return cachedBody.toString();
+        }
+
+        // 2. ContentCachingRequestWrapper에서 직접 읽기 시도
+        if (request instanceof ContentCachingRequestWrapper) {
+            ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
+            byte[] content = wrapper.getContentAsByteArray();
+            if (content.length > 0) {
+                return new String(content, StandardCharsets.UTF_8);
+            }
+        }
+
+        return "N/A";
+    }
+
+    /**
+     * ErrorResponse 객체를 생성하는 공통 메서드
+     */
+    private ErrorResponse createErrorResponse(HttpStatus status, String message, String path) {
+        return ErrorResponse.builder()
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message)
+                .path(path)
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 }
