@@ -34,7 +34,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
         // 요청 URL 로깅
-        log.info("\nMethod: {}, URL: {}, query string: {}", request.getMethod(), request.getRequestURL(), request.getQueryString());
+        log.info("Method: {}, URL: {}, query string: {}", request.getMethod(), request.getRequestURL(), request.getQueryString());
 
         // 필터 체인 실행 (Controller 처리)
         filterChain.doFilter(wrappedRequest, wrappedResponse);

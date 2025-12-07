@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         }
 
         // 한 줄 로그 출력
-        log.error("\nIllegalArgumentException - \nMethod: {}, URL: {}, QueryString: {}, \nBody: {}, \nMessage: {}",
+        log.error("\nIllegalArgumentException - Method: {}, URL: {}, QueryString: {}, \nBody: {}, \nMessage: {}",
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getQueryString() != null ? request.getQueryString() : "N/A",
