@@ -13,13 +13,11 @@ import java.time.LocalDateTime;
 
 /**
  * 전역 예외 처리 핸들러
- * 모든 Controller에서 발생하는 예외를 처리함
+ * 모든 Controller에서 발생하는 예외를 처리하고 에러 로그를 남김
  */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final String REQUEST_BODY_ATTRIBUTE = "cachedRequestBody";
 
     /**
      * IllegalArgumentException 처리
@@ -30,10 +28,8 @@ public class GlobalExceptionHandler {
             IllegalArgumentException e,
             HttpServletRequest request) {
 
-        // 요청 정보 로깅
         logException("IllegalArgumentException", e, request);
 
-        // 에러 응답 생성
         ErrorResponse errorResponse = createErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 e.getMessage(),
@@ -54,10 +50,8 @@ public class GlobalExceptionHandler {
             RuntimeException e,
             HttpServletRequest request) {
 
-        // 요청 정보 로깅
         logException("RuntimeException", e, request);
 
-        // 에러 응답 생성
         ErrorResponse errorResponse = createErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 e.getMessage(),
@@ -70,13 +64,13 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 예외 정보를 로그로 출력하는 공통 메서드
+     * 예외 정보를 에러 로그로 출력
      */
     private void logException(String exceptionType, Exception e, HttpServletRequest request) {
         String requestBody = getRequestBody(request);
         String queryString = request.getQueryString() != null ? request.getQueryString() : "N/A";
 
-        log.error("\n{} - Method: {}, URL: {}, QueryString: {}, \nBody: {}, \nMessage: {}",
+        log.error("{} - Method: {}, URL: {}, QueryString: {}, Body: {}, Message: {}",
                 exceptionType,
                 request.getMethod(),
                 request.getRequestURL(),
@@ -86,17 +80,9 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Request Body를 읽어오는 공통 메서드
-     * Filter에서 저장한 attribute 또는 ContentCachingRequestWrapper에서 읽기 시도
+     * Request Body를 ContentCachingRequestWrapper에서 읽어옴
      */
     private String getRequestBody(HttpServletRequest request) {
-        // 1. Filter에서 저장한 attribute 확인
-        Object cachedBody = request.getAttribute(REQUEST_BODY_ATTRIBUTE);
-        if (cachedBody != null && !cachedBody.toString().isEmpty()) {
-            return cachedBody.toString();
-        }
-
-        // 2. ContentCachingRequestWrapper에서 직접 읽기 시도
         if (request instanceof ContentCachingRequestWrapper) {
             ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
             byte[] content = wrapper.getContentAsByteArray();
@@ -104,7 +90,6 @@ public class GlobalExceptionHandler {
                 return new String(content, StandardCharsets.UTF_8);
             }
         }
-
         return "N/A";
     }
 
