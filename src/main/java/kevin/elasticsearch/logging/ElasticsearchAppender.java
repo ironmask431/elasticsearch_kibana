@@ -10,15 +10,19 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * Elasticsearch로 직접 로그를 전송하는 Logback Appender
+ * 날짜별로 인덱스를 자동 생성 (예: application-logs-2025.12.09)
  */
 public class ElasticsearchAppender extends AppenderBase<ILoggingEvent> {
 
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+    
     private String elasticsearchUrl = "http://localhost:9200";
     private String indexName = "application-logs";
     private HttpClient httpClient;
@@ -59,11 +63,15 @@ public class ElasticsearchAppender extends AppenderBase<ILoggingEvent> {
                 logJson.put("stacktrace", event.getThrowableProxy().getMessage());
             }
 
+            // 날짜별 인덱스명 생성 (예: application-logs-2025.12.09)
+            String dateStr = LocalDate.now().format(DATE_FORMATTER);
+            String indexNameWithDate = indexName + "-" + dateStr;
+
             // Elasticsearch로 전송
             String jsonBody = objectMapper.writeValueAsString(logJson);
             
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(elasticsearchUrl + "/" + indexName + "/_doc"))
+                    .uri(URI.create(elasticsearchUrl + "/" + indexNameWithDate + "/_doc"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
