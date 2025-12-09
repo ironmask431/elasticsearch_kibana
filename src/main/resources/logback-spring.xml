@@ -19,6 +19,16 @@
         </rollingPolicy>
     </appender>
 
+    <!-- Elasticsearch 로그 전송 (HTTP 직접 전송 - Logstash 불필요) -->
+    <appender name="ELASTIC" class="kevin.elasticsearch.logging.ElasticsearchAppender">
+        <elasticsearchUrl>http://localhost:9200</elasticsearchUrl>
+        <indexName>application-logs</indexName>
+        <!-- INFO 이상만 Elasticsearch로 전송 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
     <!-- 애플리케이션 로그는 DEBUG로 -->
     <logger name="kevin.elasticsearch" level="DEBUG"/>
 
@@ -27,11 +37,18 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <!-- 로컬 개발 환경: 파일 로그 추가 -->
-    <!-- profile 별로 다르게 적용하기 위한 옵션 -->
+    <!-- 로컬 개발 환경: 파일 로그 + Elasticsearch 전송 -->
     <springProfile name="local">
         <root level="INFO">
             <appender-ref ref="FILE"/>
+            <appender-ref ref="ELASTIC"/>
+        </root>
+    </springProfile>
+
+    <!-- 개발/운영 환경: Elasticsearch로 로그 전송 -->
+    <springProfile name="dev,prd">
+        <root level="INFO">
+            <appender-ref ref="ELASTIC"/>
         </root>
     </springProfile>
     
