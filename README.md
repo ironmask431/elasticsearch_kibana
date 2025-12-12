@@ -267,7 +267,8 @@ Elasticsearch에 저장된 로그 예시:
 }
 ```
 
-## 📈 Kibana 대시보드 screenshot
+## 📈 Kibana 로그 screenshot
+<img width="1045" height="710" alt="스크린샷 2025-12-08 오후 9 19 22" src="https://github.com/user-attachments/assets/4cad681f-009f-4a54-b419-6479075f2ecc" />
 
 
 
