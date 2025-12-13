@@ -7,6 +7,7 @@ import kevin.elasticsearch.dto.EmployeeResponse;
 import kevin.elasticsearch.repository.CompanyRepository;
 import kevin.elasticsearch.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -23,6 +25,8 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse createEmployee(EmployeeRequest request) {
+        log.info("createEmployee - name: {}, email: {}, position: {}, companyId: {}", 
+                request.getName(), request.getEmail(), request.getPosition(), request.getCompanyId());
         Employee employee = new Employee(request.getName(), request.getEmail(), request.getPosition());
         
         if (request.getCompanyId() != null) {
@@ -36,18 +40,21 @@ public class EmployeeService {
     }
 
     public EmployeeResponse getEmployee(Long id) {
+        log.info("getEmployee - id: {}", id);
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + id));
         return EmployeeResponse.from(employee);
     }
 
     public List<EmployeeResponse> getAllEmployees() {
+        log.info("getAllEmployees");
         return employeeRepository.findAll().stream()
                 .map(EmployeeResponse::from)
                 .collect(Collectors.toList());
     }
 
     public List<EmployeeResponse> getEmployeesByCompany(Long companyId) {
+        log.info("getEmployeesByCompany - companyId: {}", companyId);
         return employeeRepository.findByCompanyId(companyId).stream()
                 .map(EmployeeResponse::from)
                 .collect(Collectors.toList());
@@ -55,6 +62,8 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
+        log.info("updateEmployee - id: {}, name: {}, email: {}, position: {}, companyId: {}", 
+                id, request.getName(), request.getEmail(), request.getPosition(), request.getCompanyId());
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + id));
         
@@ -75,6 +84,7 @@ public class EmployeeService {
 
     @Transactional
     public void deleteEmployee(Long id) {
+        log.info("deleteEmployee - id: {}", id);
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + id));
         

@@ -40,7 +40,7 @@
     <!-- 로컬 개발 환경: 파일 로그 + Elasticsearch 전송 -->
     <springProfile name="local">
         <root level="INFO">
-            <appender-ref ref="FILE"/>
+<!--            <appender-ref ref="FILE"/>-->
             <appender-ref ref="ELASTIC"/>
         </root>
     </springProfile>

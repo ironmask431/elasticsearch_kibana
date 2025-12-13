@@ -34,8 +34,6 @@ public class EmployeeController {
     @GetMapping
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees(
             @RequestParam(required = false) Long companyId) {
-        log.debug("debug log test - companyId : {}", companyId);
-        log.trace("trace log test - companyId : {}", companyId);
         List<EmployeeResponse> responses;
         if (companyId != null) {
             responses = employeeService.getEmployeesByCompany(companyId);
