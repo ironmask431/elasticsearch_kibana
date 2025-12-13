@@ -15,4 +15,4 @@ spring:
 logging:
   level:
     root: info
-    org.hibernate.SQL: INFO
+#    org.hibernate.SQL: INFO
