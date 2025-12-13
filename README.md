@@ -268,8 +268,11 @@ Elasticsearch에 저장된 로그 예시:
 ```
 
 ## 📈 Kibana 로그 screenshot
+로그레벨 error 필터링 
 <img width="1045" height="710" alt="스크린샷 2025-12-08 오후 9 19 22" src="https://github.com/user-attachments/assets/4cad681f-009f-4a54-b419-6479075f2ecc" />
 
+특정 keyword로 로그 검색
+<img width="1324" height="557" alt="스크린샷 2025-12-13 오전 9 58 07" src="https://github.com/user-attachments/assets/6c7e3e64-e73a-466b-9328-96d77e81fd2a" />
 
 
 ## 🔍 주요 특징
